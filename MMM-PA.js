@@ -10,17 +10,41 @@ Module.register("MMM-PA", {
     start: function () {
         console.log("[MMM-PA] Module started...");
         this.sendSocketNotification("FETCH_DATA", this.config);
+        this.cachedText2 = "";  // Store text2 value for later use
+    },
+
+    notificationReceived: function (notification) {
+        if (notification === "SSML_FAILED") {
+            console.log("[MMM-PA] SSML_FAILED received. Preparing to send TTS_SAY notification.");
+
+            if (!this.cachedText2) {
+                console.error("[MMM-PA] Error: No cached text2 available.");
+                return;
+            }
+
+            console.log(`[MMM-PA] Sending TTS_SAY with payload: ${this.cachedText2}`);
+            this.sendNotification("TTS_SAY", {
+                content: this.cachedText2,  // Use the cached plain text summary
+                type: "text",
+                voiceName: "en-GB-Journey-F",
+                languageCode: "en-GB",
+                ssmlGender: "FEMALE"
+            });
+        }
     },
 
     socketNotificationReceived: function (notification, payload) {
         if (notification === "SEND_GLOBAL_NOTIFICATION") {
             console.log("[MMM-PA] Broadcasting SSML notification globally with additional parameters...");
+            
+            // Cache the plain text summary for later use
+            this.cachedText2 = payload.text2 || "";
 
             // Send the SSML notification with required fields
             this.sendNotification("SSML", {
-                text: payload.ssmlSummary, // SSML summary as text
-                voiceName: "Lily",         // Specifying voice name
-                stream: true               // Enable streaming
+                text: payload.text1, // SSML summary as text
+                voiceName: payload.voiceName || "Lily",
+                stream: payload.stream || true
             });
         }
     },

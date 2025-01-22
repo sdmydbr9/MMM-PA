@@ -22,18 +22,15 @@ module.exports = NodeHelper.create({
                 console.log("[MMM-PA] ✅ Generated Plain Text Summary:\n", textSummary);
 
                 // Send the SSML notification globally with extra parameters
-                this.sendSocketNotification("SEND_GLOBAL_NOTIFICATION", { 
-                    ssmlSummary,
-                    text: ssmlSummary,  // Adding text to the payload
-                    voiceName: "Lily",  // Specifying voice
-                    stream: true         // Enabling stream for audio output
+                this.sendSocketNotification("SEND_GLOBAL_NOTIFICATION", {
+                    text1: ssmlSummary,  // SSML summary
+                    text2: textSummary,  // Plain text summary
+                    voiceName: "Lily",   // Voice configuration
+                    stream: true          // Streaming enabled
                 });
 
-                // Set up a fallback handler for TTS_SAY if SSML fails
-                this.ssmlFallbackHandler = () => {
-                    console.warn("[MMM-PA] ⚠️ SSML failed, sending TTS_SAY with text summary.");
-                    this.sendSocketNotification("TTS_SAY", textSummary);
-                };
+
+
             } catch (error) {
                 console.error("[MMM-PA] ❌ Error in processing:", error);
             }
@@ -90,15 +87,34 @@ module.exports = NodeHelper.create({
         }
     },
 
+
+    
+
     async summarizeDataSSML(apiKey, news, weather) {
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const now = new Date();
+            const dateString = now.toLocaleDateString('en-US', {
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            });
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true
+            });
+    
             const requestBody = {
                 contents: [{
                     parts: [{
                         text: `
                         You are a news anchor in a dystopian world after a third world war. We are in a nuclear winter now.
                         Provide the news and weather report in the style of a news anchor, add emotions and breaks and output the results in ssml.
+
+                         current date is Date: ${dateString} and time is  Time: ${timeString}
+                       
 
                         News Headlines:
                         ${news}
@@ -138,12 +154,26 @@ module.exports = NodeHelper.create({
     async summarizeDataTEXT(apiKey, news, weather) {
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+            const now = new Date();
+            const dateString = now.toLocaleDateString('en-US', {
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            });
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit', 
+                minute: '2-digit', 
+                hour12: true
+            });
             const requestBody = {
                 contents: [{
                     parts: [{
                         text: `
                         You are a news anchor in a dystopian world after a third world war. We are in a nuclear winter now.
-                        Provide a plain text summary.
+                        these are todays news headlines, give me the news in the style of news anchor in plain text
+                         current date is Date: ${dateString} and time is  Time: ${timeString}
 
                         News Headlines:
                         ${news}
