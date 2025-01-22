@@ -1,0 +1,16 @@
+{
+  "name": "MMM-PA",
+  "version": "1.0.0",
+  "description": "A MagicMirror module that fetches top 10 news headlines from The New York Times, retrieves weather data from OpenWeather, summarizes the data using Gemini AI, and sends a TTS notification.",
+  "main": "MMM-PA.js",
+  "scripts": {
+    "start": "node node_helper.js"
+  },
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^5.8.0",
+    "@google/generative-ai": "^0.5.0",
+    "axios": "^1.5.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
